@@ -45,7 +45,9 @@ export interface HttpRequestExtendType {
 
 const globalExtendOptions: HttpRequestExtendType = {};
 
-interface RequestOption extends Omit<BasicOption, 'onProgress' | 'headers'>, Omit<https.RequestOptions, 'method'> {
+interface RequestOption
+  extends Omit<BasicOption, 'onProgress'>,
+    Omit<https.RequestOptions, 'method' | 'headers'> {
   onProgress?(progress: number, total: number): void;
 }
 export function request<T = GenericResponse>(url: string, opt: RequestOption = {}): Promise<T> {
@@ -64,16 +66,24 @@ export function request<T = GenericResponse>(url: string, opt: RequestOption = {
   const isHttpUlr = HttpRegExp.test(url);
   // 添加请求前缀
   let prefix = isHttpUlr ? '' : globalExtendOptions.prefix || '';
+  const {
+    method = 'GET',
+    headers,
+    onProgress,
+    responseType,
+    abortId,
+    data,
+    params: _params,
+    prefix: _prefix,
+    ...other
+  } = options;
 
-  if (options.prefix) {
-    prefix = options.prefix;
+  if (_prefix) {
+    prefix = _prefix;
   }
 
-  if (
-    options.params &&
-    (Object.keys(options.params).length || options.params instanceof URLSearchParams)
-  ) {
-    const params = new URLSearchParams(options.params as Record<string, string>);
+  if (_params && (Object.keys(_params).length || _params instanceof URLSearchParams)) {
+    const params = new URLSearchParams(_params as Record<string, string>);
 
     uri = `${url}?${params.toString()}`;
   }
@@ -89,9 +99,9 @@ export function request<T = GenericResponse>(url: string, opt: RequestOption = {
         hostname: urlObj.hostname,
         port: urlObj.port || (isHttps ? 443 : 80),
         path: urlObj.pathname + urlObj.search,
-        ...options,
-        method: options.method || 'GET',
-        headers: options.headers,
+        method: method,
+        headers: headers,
+        ...other,
       },
       (res) => {
         if (res.statusCode === 302 || res.statusCode === 301) {
@@ -108,17 +118,17 @@ export function request<T = GenericResponse>(url: string, opt: RequestOption = {
         res.on('data', (chunk) => {
           progress += chunk.length;
           chunks.push(chunk);
-          if (options.onProgress) {
-            options.onProgress(progress, total);
+          if (onProgress) {
+            onProgress(progress, total);
           }
         });
         res.on('end', () => {
           const rawData = Buffer.concat(chunks);
           let parsedData: T;
-          const responseType = options.responseType === void 0 ? 'json' : options.responseType;
+          const type = responseType === void 0 ? 'json' : responseType;
 
           try {
-            switch (responseType) {
+            switch (type) {
               case 'json':
                 parsedData = JSON.parse(rawData.toString()) as T;
                 break;
@@ -146,14 +156,14 @@ export function request<T = GenericResponse>(url: string, opt: RequestOption = {
       reject(err);
     });
 
-    if (options.abortId) {
+    if (abortId) {
       const controller = new AbortController();
 
-      abortControllers.set(options.abortId, controller);
+      abortControllers.set(abortId, controller);
       controller.signal.addEventListener('abort', () => req.destroy());
     }
-    if (options.data !== null && !['undefined', 'string'].includes(typeof options.data)) {
-      req.write(typeof options.data === 'object' ? JSON.stringify(options.data) : options.data);
+    if (data !== null && !['undefined', 'string'].includes(typeof data)) {
+      req.write(typeof data === 'object' ? JSON.stringify(data) : data);
     }
     req.end();
   });

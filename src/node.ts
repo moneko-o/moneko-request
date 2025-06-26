@@ -45,7 +45,7 @@ export interface HttpRequestExtendType {
 
 const globalExtendOptions: HttpRequestExtendType = {};
 
-interface RequestOption extends Omit<BasicOption, 'onProgress'> {
+interface RequestOption extends Omit<BasicOption, 'onProgress' | 'headers'>, Omit<https.RequestOptions, 'method'> {
   onProgress?(progress: number, total: number): void;
 }
 export function request<T = GenericResponse>(url: string, opt: RequestOption = {}): Promise<T> {
@@ -89,6 +89,7 @@ export function request<T = GenericResponse>(url: string, opt: RequestOption = {
         hostname: urlObj.hostname,
         port: urlObj.port || (isHttps ? 443 : 80),
         path: urlObj.pathname + urlObj.search,
+        ...options,
         method: options.method || 'GET',
         headers: options.headers,
       },

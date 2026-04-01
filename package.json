@@ -1,6 +1,6 @@
 {
   "name": "@moneko/request",
-  "version": "1.7.0-beta.0",
+  "version": "1.7.0-beta.1",
   "description": "A lightweight and flexible request library for Node.js and browsers",
   "main": "./cjs/index.cjs",
   "module": "./esm/index.mjs",

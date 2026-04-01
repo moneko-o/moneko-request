@@ -51,7 +51,6 @@ await Promise.all([
   convert({
     outDir: 'esm',
     inputDir: 'src',
-    outputExtension: '.mjs',
     ignore: [/__tests__/],
     options: {
       ...common,
@@ -63,7 +62,6 @@ await Promise.all([
   convert({
     outDir: 'cjs',
     inputDir: 'src',
-    outputExtension: '.cjs',
     ignore: [/__tests__/],
     options: {
       ...common,

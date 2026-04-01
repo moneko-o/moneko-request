@@ -75,5 +75,8 @@ await Promise.all([
 ]).then((childs) => {
   childs.forEach((result) => {
     result.failed.map((msg) => process.stdout.write(msg));
+    if (result.failed.length) {
+       throw new Error('编译失败');
+    }
   });
 });

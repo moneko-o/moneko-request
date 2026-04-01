@@ -2,6 +2,8 @@
 
 `@moneko/request` 是一个网络请求库，提供了拦截器、自定义请求前缀、取消请求等功能，适用于浏览器和 NodeJS 的 HTTP 请求管理。
 
+![moneko-o](https://count.getloli.com/get/@moneko-o?theme=rule34)
+
 ---
 
 ## 📌 安装

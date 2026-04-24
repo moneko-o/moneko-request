@@ -139,6 +139,38 @@ cancelRequest('unique-id');
 
 ---
 
+---
+
+## 流式传输（支持SSE）
+
+```typescript
+import { request } from '@moneko/request';
+
+let offset = 0;
+
+request('/sse-stream', {
+  responseType: 'text',
+  onAbort() {
+    // 取消
+  },
+  onProgress({ target: req }) {
+    if (!req) return;
+    // 接收 chunk
+    const chunk = req.responseText.slice(offset);
+
+    offset += chunk.length;
+    if (chunk) {
+      console.log(chunk);
+    }
+    if (req.readyState === req.DONE) {
+      console.log('Done');
+    }
+  },
+});
+```
+
+---
+
 ## 🎯 自定义拦截器
 
 `@moneko/request` 提供了 `interceptor` 选项，允许你在请求或响应时进行自定义处理，例如 **全局错误捕获**、**请求日志** 等。
